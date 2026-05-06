@@ -24,11 +24,13 @@ jobs:
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # https://github.com/actions/checkout/releases/tag/v6.0.2
 
     - name: Setup .NET SDK
+      if: contains(matrix.runner, 'self-hosted')
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '10.0.105'
 
     - name: Fix code formatting
+      if: contains(matrix.runner, 'self-hosted')
       shell: pwsh
       run: dotnet format PSADT.slnx --severity info
 
@@ -52,7 +54,9 @@ jobs:
       id: psmodule-cache
       uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306  # https://github.com/actions/cache/releases/tag/v5.0.3
       with:
-        path: ~\Documents\WindowsPowerShell\Modules
+        path: |
+          ~\Documents\WindowsPowerShell\Modules
+          ${{ contains(matrix.runner, 'self-hosted') && '~\Documents\PowerShell\Modules' || '' }}
         key: ${{ runner.os }}-psmodule-PSScriptAnalyzer-1.25.0-Pester-5.7.1-platyPS-0.14.2-Alt3.Docusaurus.Powershell-1.0.37
 
     - name: Install PowerShell modules
