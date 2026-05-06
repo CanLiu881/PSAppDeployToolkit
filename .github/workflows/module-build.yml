@@ -11,10 +11,14 @@ env:
   NUGET_PACKAGES: ${{ github.workspace }}\.nuget\packages
 jobs:
   test:
-    name: Run Tests
-    runs-on: [self-hosted, windows, x64]
+    name: Run Tests (${{ matrix.runner }})
+    runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
+      matrix:
+        runner:
+          - [self-hosted, windows, x64]
+          - windows-latest
     steps:
     - name: Check out repository
       uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # https://github.com/actions/checkout/releases/tag/v6.0.2
@@ -23,6 +27,10 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '10.0.105'
+
+    - name: Fix code formatting
+      shell: pwsh
+      run: dotnet format src/PSADT/PSADT.slnx --severity info --no-restore
 
     - name: Display the path
       shell: powershell
