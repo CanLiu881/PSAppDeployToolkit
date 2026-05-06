@@ -30,7 +30,7 @@ jobs:
 
     - name: Fix code formatting
       shell: pwsh
-      run: dotnet format src/PSADT/PSADT.slnx --severity info --no-restore
+      run: dotnet format PSADT.slnx --severity info --no-restore
 
     - name: Display the path
       shell: powershell
