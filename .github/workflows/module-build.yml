@@ -44,10 +44,8 @@ jobs:
 
     - name: Install PowerShell modules
       if: steps.psmodule-cache.outputs.cache-hit != 'true'
-      shell: powershell
+      shell: pwsh
       run: |
-        Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Scope CurrentUser
-        Import-Module PowerShellGet -Force
         Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
         Install-Module -Name PSScriptAnalyzer -RequiredVersion 1.25.0 -Force -Scope CurrentUser
         Install-Module -Name Pester -RequiredVersion 5.7.1 -Force -SkipPublisherCheck -Scope CurrentUser
