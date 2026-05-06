@@ -59,6 +59,22 @@ jobs:
           ${{ contains(matrix.runner, 'self-hosted') && '~\Documents\PowerShell\Modules' || '' }}
         key: ${{ runner.os }}-psmodule-PSScriptAnalyzer-1.25.0-Pester-5.7.1-platyPS-0.14.2-Alt3.Docusaurus.Powershell-1.0.37
 
+    - name: Remove conflicting system Pester (self-hosted only)
+      if: contains(matrix.runner, 'self-hosted')
+      shell: powershell
+      run: |
+        # GitHub-hosted runners ship without a system Pester; self-hosted Windows machines
+        # include a Microsoft-signed Pester 3.4.0 that blocks installing newer versions.
+        # Remove it to match the clean-slate behaviour of GitHub-hosted runners.
+        $systemPesterPaths = Get-Module -Name Pester -ListAvailable |
+            Where-Object { $_.Path -notlike "*\Documents\*" } |
+            Select-Object -ExpandProperty ModuleBase
+        foreach ($path in $systemPesterPaths)
+        {
+            Write-Host "Removing system Pester at: $path"
+            Remove-Item -Path $path -Recurse -Force -ErrorAction SilentlyContinue
+        }
+
     - name: Install PowerShell modules
       if: steps.psmodule-cache.outputs.cache-hit != 'true'
       shell: pwsh
@@ -70,7 +86,7 @@ jobs:
         Install-Module -Name Alt3.Docusaurus.Powershell -RequiredVersion 1.0.37 -Force -Scope CurrentUser
 
     - name: Install PowerShell modules (Windows PowerShell)
-      if: steps.psmodule-cache.outputs.cache-hit != 'true'
+      if: steps.psmodule-cache.outputs.cache-hit != 'true' && contains(matrix.runner, 'self-hosted')
       shell: powershell
       run: |
         Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
