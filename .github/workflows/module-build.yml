@@ -69,6 +69,16 @@ jobs:
         Install-Module -Name platyPS -RequiredVersion 0.14.2 -Force -Scope CurrentUser
         Install-Module -Name Alt3.Docusaurus.Powershell -RequiredVersion 1.0.37 -Force -Scope CurrentUser
 
+    - name: Install PowerShell modules (Windows PowerShell)
+      if: steps.psmodule-cache.outputs.cache-hit != 'true'
+      shell: powershell
+      run: |
+        Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+        Install-Module -Name PSScriptAnalyzer -RequiredVersion 1.25.0 -Force -Scope CurrentUser
+        Install-Module -Name Pester -RequiredVersion 5.7.1 -Force -SkipPublisherCheck -Scope CurrentUser
+        Install-Module -Name platyPS -RequiredVersion 0.14.2 -Force -Scope CurrentUser
+        Install-Module -Name Alt3.Docusaurus.Powershell -RequiredVersion 1.0.37 -Force -Scope CurrentUser
+
     - name: Test and Build
       shell: cmd
       run: powershell.exe -ExecutionPolicy Bypass -File build.ps1
