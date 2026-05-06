@@ -29,10 +29,10 @@ jobs:
       with:
         dotnet-version: '10.0.105'
 
-    - name: Fix code formatting
-      if: contains(matrix.runner, 'self-hosted')
-      shell: pwsh
-      run: dotnet format PSADT.slnx --severity info
+    # - name: Fix code formatting
+    #   if: contains(matrix.runner, 'self-hosted')
+    #   shell: pwsh
+    #   run: dotnet format PSADT.slnx --severity info
 
     - name: Display the path
       shell: powershell
@@ -94,6 +94,14 @@ jobs:
         Install-Module -Name Pester -RequiredVersion 5.7.1 -Force -SkipPublisherCheck -Scope CurrentUser
         Install-Module -Name platyPS -RequiredVersion 0.14.2 -Force -Scope CurrentUser
         Install-Module -Name Alt3.Docusaurus.Powershell -RequiredVersion 1.0.37 -Force -Scope CurrentUser
+
+    - name: Clean build artifacts (self-hosted only)
+      if: contains(matrix.runner, 'self-hosted')
+      shell: pwsh
+      run: |
+        # Self-hosted runners persist build state between runs. Stale WPF _wpftmp
+        # temporary projects in obj/ directories cause CS0260 partial class conflicts.
+        Get-ChildItem -Path . -Include 'bin','obj' -Recurse -Directory | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
 
     - name: Test and Build
       shell: cmd
