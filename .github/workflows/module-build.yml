@@ -48,6 +48,15 @@ jobs:
             Write-Host "PowerShell $current is already on 7.4.x — no action needed"
         }
 
+    - name: Clean build artifacts (self-hosted only)
+      if: contains(matrix.runner, 'self-hosted')
+      shell: pwsh
+      run: |
+        # Self-hosted runners persist build state between runs. Stale WPF _wpftmp
+        # temporary projects in obj/ directories cause CS0260 partial class conflicts.
+        # Must run BEFORE dotnet format, which triggers WPF compilation and would hit stale files.
+        Get-ChildItem -Path . -Include 'bin','obj' -Recurse -Directory | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+
     # - name: Fix code formatting
     #   if: contains(matrix.runner, 'self-hosted')
     #   shell: pwsh
@@ -118,14 +127,6 @@ jobs:
         Install-Module -Name Pester -RequiredVersion 5.7.1 -Force -SkipPublisherCheck -Scope CurrentUser
         Install-Module -Name platyPS -RequiredVersion 0.14.2 -Force -Scope CurrentUser
         Install-Module -Name Alt3.Docusaurus.Powershell -RequiredVersion 1.0.37 -Force -Scope CurrentUser
-
-    - name: Clean build artifacts (self-hosted only)
-      if: contains(matrix.runner, 'self-hosted')
-      shell: pwsh
-      run: |
-        # Self-hosted runners persist build state between runs. Stale WPF _wpftmp
-        # temporary projects in obj/ directories cause CS0260 partial class conflicts.
-        Get-ChildItem -Path . -Include 'bin','obj' -Recurse -Directory | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
 
     - name: Test and Build
       shell: cmd
