@@ -65,10 +65,7 @@ jobs:
     - name: Fix code formatting
       if: contains(matrix.runner, 'self-hosted')
       shell: pwsh
-      # Exclude FluentDialog.xaml.cs from analyzer formatting: SonarLint S2333 incorrectly flags
-      # the 'partial' modifier as gratuitous, but it is required for WPF XAML code-behind generation.
-      # Running 'dotnet format --severity info' without exclusion causes CS0260 partial class conflicts.
-      run: dotnet format PSADT.slnx --severity info --exclude "src/PSADT/PSADT.UserInterface/Interfaces/Fluent/FluentDialog.xaml.cs"
+      run: dotnet format PSADT.slnx --severity info
 
     - name: Display the path
       shell: powershell
