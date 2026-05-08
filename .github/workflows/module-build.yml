@@ -62,10 +62,15 @@ jobs:
     #   shell: pwsh
     #   run: dotnet format PSADT.slnx --severity info
 
-    # - name: Fix code formatting
-    #   if: contains(matrix.runner, 'self-hosted')
-    #   shell: pwsh
-    #   run: dotnet format PSADT.slnx --severity info
+    - name: Fix code formatting
+      if: contains(matrix.runner, 'self-hosted')
+      shell: pwsh
+      run: |
+        # Run only whitespace and style formatting.
+        # Do NOT run 'dotnet format --severity info' (which includes analyzers),
+        # as SonarLint S2333 conflicts with WPF XAML partial class generation (CS0260).
+        dotnet format PSADT.slnx whitespace
+       
 
     - name: Display the path
       shell: powershell
@@ -80,7 +85,7 @@ jobs:
       with:
         path: ${{ env.NUGET_PACKAGES }}
         key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-        restore-keys: |
+        restore-keys: | dotnet format PSADT.slnx style --severity info
           ${{ runner.os }}-nuget-
 
     - name: Cache PowerShell modules
