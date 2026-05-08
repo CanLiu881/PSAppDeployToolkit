@@ -70,7 +70,7 @@ jobs:
         # Do NOT run 'dotnet format --severity info' (which includes analyzers),
         # as SonarLint S2333 conflicts with WPF XAML partial class generation (CS0260).
         dotnet format PSADT.slnx whitespace
-       
+        dotnet format PSADT.slnx style --severity info
 
     - name: Display the path
       shell: powershell
@@ -85,7 +85,7 @@ jobs:
       with:
         path: ${{ env.NUGET_PACKAGES }}
         key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
-        restore-keys: | dotnet format PSADT.slnx style --severity info
+        restore-keys: |
           ${{ runner.os }}-nuget-
 
     - name: Cache PowerShell modules
