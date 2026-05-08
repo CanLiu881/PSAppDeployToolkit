@@ -33,13 +33,17 @@ jobs:
       if: contains(matrix.runner, 'self-hosted')
       shell: pwsh
       run: |
-        # GitHub-hosted runners use PowerShell 7.4.14. Pin self-hosted to the same
+        # GitHub-hosted runners use PowerShell 7.4.x. Pin self-hosted to the same
         # minor version to ensure consistent behaviour (e.g. dotnet format, module installs).
         $required = [Version]'7.4.0'
         $current  = $PSVersionTable.PSVersion
-        if ($current -lt $required -or $current.Major -ne $required.Major -or $current.Minor -ne $required.Minor) {
+        if ($current.Major -ne $required.Major -or $current.Minor -ne $required.Minor) {
             Write-Host "Current PowerShell: $current — installing 7.4 LTS to match GitHub-hosted runner"
-            Invoke-Expression "& { $(Invoke-RestMethod https://aka.ms/install-powershell.ps1) } -Version 7.4.14 -Quiet"
+            $msiUrl = 'https://github.com/PowerShell/PowerShell/releases/download/v7.4.14/PowerShell-7.4.14-win-x64.msi'
+            $msiPath = Join-Path $env:TEMP 'pwsh-7.4.14.msi'
+            Invoke-WebRequest -Uri $msiUrl -OutFile $msiPath -UseBasicParsing
+            Start-Process msiexec.exe -ArgumentList "/i `"$msiPath`" /quiet /norestart ADD_EXPLORER_CONTEXT_MENU_OPENPOWERSHELL=0 ENABLE_PSREMOTING=0 REGISTER_MANIFEST=1" -Wait
+            Write-Host "PowerShell 7.4.14 installed. Restart required to use new version in subsequent steps."
         } else {
             Write-Host "PowerShell $current is already on 7.4.x — no action needed"
         }
