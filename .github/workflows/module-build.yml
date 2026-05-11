@@ -58,20 +58,20 @@ jobs:
       if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/4.0.x' || github.ref == 'refs/heads/4.1.x'
       run: dotnet tool install --global azuresigntool
 
-    - name: Azure Login
-      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/4.0.x' || github.ref == 'refs/heads/4.1.x'
-      uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43  # https://github.com/Azure/login/releases/tag/v3.0.0
-      with:
-        client-id: ${{ secrets.AZURE_CLIENT_ID }}
-        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+    # - name: Azure Login
+    #   if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/4.0.x' || github.ref == 'refs/heads/4.1.x'
+    #   uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43  # https://github.com/Azure/login/releases/tag/v3.0.0
+    #   with:
+    #     client-id: ${{ secrets.AZURE_CLIENT_ID }}
+    #     tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+    #     subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-    - name: Sign module source
-      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/4.0.x' || github.ref == 'refs/heads/4.1.x'
-      shell: powershell
-      run: |
-        Get-ChildItem -Path "$($PWD)\src\Artifacts\ModuleOnly\PSAppDeployToolkit" -Include '*.ps*1', 'PSAppDeployToolkit.dll', 'PSADT*.dll', 'PSADT*.exe', 'iNKORE.UI.WPF*.dll', 'Invoke-AppDeployToolkit.exe' -Recurse | Select-Object -ExpandProperty FullName | Out-File "FilesToSign.txt"
-        & azuresigntool.exe sign -s -kvu https://psadt-kv-prod-codesign.vault.azure.net -kvc PSADT -kvm -tr http://timestamp.digicert.com -td sha256 -ifl FilesToSign.txt
+    # - name: Sign module source
+    #   if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/4.0.x' || github.ref == 'refs/heads/4.1.x'
+    #   shell: powershell
+    #   run: |
+    #     Get-ChildItem -Path "$($PWD)\src\Artifacts\ModuleOnly\PSAppDeployToolkit" -Include '*.ps*1', 'PSAppDeployToolkit.dll', 'PSADT*.dll', 'PSADT*.exe', 'iNKORE.UI.WPF*.dll', 'Invoke-AppDeployToolkit.exe' -Recurse | Select-Object -ExpandProperty FullName | Out-File "FilesToSign.txt"
+    #     & azuresigntool.exe sign -s -kvu https://psadt-kv-prod-codesign.vault.azure.net -kvc PSADT -kvm -tr http://timestamp.digicert.com -td sha256 -ifl FilesToSign.txt
 
     - name: Generate artifact templates
       id: exports
