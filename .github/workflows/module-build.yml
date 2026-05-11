@@ -62,11 +62,6 @@ jobs:
     #   shell: pwsh
     #   run: dotnet format PSADT.slnx --severity info
 
-    - name: Fix code formatting
-      if: contains(matrix.runner, 'self-hosted')
-      shell: pwsh
-      run: dotnet format PSADT.slnx --severity info
-
     - name: Display the path
       shell: powershell
       run: echo ${env:PATH}
