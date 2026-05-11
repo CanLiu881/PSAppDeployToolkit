@@ -9,8 +9,16 @@ env:
   NUGET_PACKAGES: ${{ github.workspace }}\.nuget\packages
 jobs:
   test:
-    name: Run Tests
-    runs-on: windows-latest
+    # name: Run Tests
+    # runs-on: windows-latest
+    name: Run Tests (${{ matrix.runner }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runner:
+          - [self-hosted, windows, x64]
+          - windows-latest
     strategy:
       fail-fast: false
     steps:
@@ -24,6 +32,10 @@ jobs:
     - name: Version Display
       shell: powershell
       run: $PSVersionTable
+
+    - name: .NET Version Display
+      shell: powershell
+      run: dotnet --info
 
     - name: Cache NuGet packages
       uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # https://github.com/actions/cache/releases/tag/v5.0.5
