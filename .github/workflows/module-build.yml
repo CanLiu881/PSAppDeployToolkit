@@ -70,6 +70,10 @@ jobs:
       shell: powershell
       run: $PSVersionTable
 
+    - name: .NET SDK List
+      shell: pwsh
+      run: dotnet --list-sdks
+
     - name: Cache NuGet packages
       uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae  # https://github.com/actions/cache/releases/tag/v5.0.5
       with:
