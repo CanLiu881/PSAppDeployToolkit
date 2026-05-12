@@ -157,7 +157,11 @@ Describe 'New-ADTTemplate' {
         It 'Preserves the source template trailing line breaks' {
             $sourcePath = Join-Path -Path $PSScriptRoot -ChildPath '..\..\PSAppDeployToolkit\opt\Frontend\v4\Invoke-AppDeployToolkit.ps1'
             $generatedPath = Join-Path -Path $template.Path -ChildPath 'Invoke-AppDeployToolkit.ps1'
-            (Get-ADTTrailingLineBreaks -LiteralPath $generatedPath) | Should -Be (Get-ADTTrailingLineBreaks -LiteralPath $sourcePath)
+            # Normalise \r\n -> \n before comparing so the assertion checks the count of trailing
+            # newlines rather than line-ending style. The generator normalises to [Environment]::NewLine
+            # (CRLF on Windows) while the source file may have LF endings on runners where git
+            # core.autocrlf is false or input.
+            (Get-ADTTrailingLineBreaks -LiteralPath $generatedPath).Replace('\r\n', '\n') | Should -Be (Get-ADTTrailingLineBreaks -LiteralPath $sourcePath).Replace('\r\n', '\n')
         }
 
         It 'Config\config.psd1 has UTF-8 BOM' {
