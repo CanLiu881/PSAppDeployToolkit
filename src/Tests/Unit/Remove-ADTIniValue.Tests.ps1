@@ -4,13 +4,12 @@
 }
 Describe 'Remove-ADTIniValue' {
     BeforeAll {
-        $IniContent = @"
-[MySection]
-MyKey=MyValue
-MyOtherKey=MyOtherValue
-"@
+        # Use explicit CRLF line endings so that WritePrivateProfileSection preserves them
+        # when rewriting existing sections. PowerShell normalises here-string newlines to LF,
+        # so we build the content with explicit `r`n to guarantee CRLF on all runners.
+        $IniContent = "[MySection]`r`nMyKey=MyValue`r`nMyOtherKey=MyOtherValue`r`n"
         $IniPath = "$TestDrive\IniFile.ini"
-        Set-Content -Path $IniPath -Value $IniContent -Encoding Ascii -Force
+        [System.IO.File]::WriteAllText($IniPath, $IniContent, [System.Text.Encoding]::ASCII)
 
         # Mock Write-ADTLogEntry due to its expense when running via Pester.
         Mock -ModuleName PSAppDeployToolkit Write-ADTLogEntry { }
