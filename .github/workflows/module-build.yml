@@ -66,8 +66,21 @@ jobs:
       if: steps.psmodule-cache.outputs.cache-hit != 'true'
       shell: powershell
       run: |
-        Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Scope CurrentUser
-        Install-Module -Name PowerShellGet -MinimumVersion 2.2.5 -Force -Scope CurrentUser -AllowClobber
+        # Ensure the NuGet package provider is available.
+        $nugetProvider = Get-PackageProvider -Name NuGet -ErrorAction Ignore
+        if (!$nugetProvider -or $nugetProvider.Version -lt [Version]'2.8.5.201')
+        {
+            Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -Scope CurrentUser
+        }
+
+        # Only upgrade PowerShellGet if needed. On self-hosted runners the required version is often
+        # pre-installed; attempting to re-install it hits the PSGallery v2 API which may be unreachable.
+        $psGet = Get-Module -Name PowerShellGet -ListAvailable | Sort-Object Version -Descending | Select-Object -First 1
+        if (!$psGet -or $psGet.Version -lt [Version]'2.2.5')
+        {
+            Install-Module -Name PowerShellGet -MinimumVersion 2.2.5 -Force -Scope CurrentUser -AllowClobber
+        }
+
         Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
         Install-Module -Name PSScriptAnalyzer -RequiredVersion 1.25.0 -Force -Scope CurrentUser
         Install-Module -Name Pester -RequiredVersion 5.7.1 -Force -SkipPublisherCheck -Scope CurrentUser
