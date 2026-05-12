@@ -124,7 +124,10 @@ function Convert-ADTRegistryPath
                 }
 
                 # If the SID variable is specified, then convert all HKEY_CURRENT_USER key's to HKEY_USERS\$SID.
-                if ($PSBoundParameters.ContainsKey('SID') -and !$SID.Equals([PSADT.AccountManagement.AccountUtilities]::CallerSid))
+                # Note: The previous CallerSid short-circuit (!$SID.Equals(CallerSid)) was removed because it caused
+                # both the HKCU->HKEY_USERS replacement and the non-HKCU validation to be skipped when the calling
+                # process runs as the same account as the specified SID (e.g. SYSTEM on a self-hosted runner).
+                if ($PSBoundParameters.ContainsKey('SID'))
                 {
                     if ($Key -notmatch '^Microsoft\.PowerShell\.Core\\Registry::HKEY_CURRENT_USER\\')
                     {

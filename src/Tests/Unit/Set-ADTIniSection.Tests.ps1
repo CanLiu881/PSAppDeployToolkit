@@ -8,13 +8,12 @@ Describe 'Set-ADTIniSection' {
         Mock -ModuleName PSAppDeployToolkit Write-ADTLogEntry { }
     }
     BeforeEach {
-        $IniContent = @"
-[MySection]
-MyKey=MyValue
-MyKey2=MyValue2
-"@
+        # Use explicit CRLF line endings so that WritePrivateProfileSection preserves them
+        # when rewriting existing sections. PowerShell normalises here-string newlines to LF,
+        # so we build the content with explicit `r`n to guarantee CRLF on all runners.
+        $IniContent = "[MySection]`r`nMyKey=MyValue`r`nMyKey2=MyValue2`r`n"
         $IniPath = "$TestDrive\IniFile.ini"
-        Set-Content -Path $IniPath -Value $IniContent -Encoding Ascii -Force
+        [System.IO.File]::WriteAllText($IniPath, $IniContent, [System.Text.Encoding]::ASCII)
     }
 
     Context 'Functionality' {
