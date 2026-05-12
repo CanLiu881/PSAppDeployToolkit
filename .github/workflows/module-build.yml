@@ -84,8 +84,21 @@ jobs:
         # windows-latest runners have 7-Zip pre-installed; self-hosted runners may not.
         if (!(Test-Path 'C:\Program Files\7-Zip\7z.exe') -and !(Test-Path 'C:\Program Files (x86)\7-Zip\7z.exe'))
         {
-            Write-Host '7-Zip not found, installing via winget...'
-            winget install --id 7zip.7zip --exact --silent --accept-package-agreements --accept-source-agreements
+            Write-Host '7-Zip not found, installing...'
+            if (Get-Command choco -ErrorAction Ignore)
+            {
+                choco install 7zip --yes --no-progress
+            }
+            else
+            {
+                # Fall back to direct MSI download from 7-zip.org
+                $msi = "$env:TEMP\7z-x64.msi"
+                $page = Invoke-WebRequest -Uri 'https://www.7-zip.org/download.html' -UseBasicParsing
+                $url = 'https://www.7-zip.org/' + ($page.Links.href | Where-Object { $_ -match '7z\d+-x64\.msi$' } | Select-Object -First 1)
+                Invoke-WebRequest -Uri $url -OutFile $msi -UseBasicParsing
+                Start-Process msiexec.exe -ArgumentList "/i `"$msi`" /quiet /norestart" -Wait
+                Remove-Item $msi -Force
+            }
         }
         else
         {
