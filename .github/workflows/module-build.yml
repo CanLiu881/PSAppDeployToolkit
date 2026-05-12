@@ -50,6 +50,11 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-nuget-
 
+    - name: Clean dotnet build artifacts before script analysis
+      shell: powershell
+      run: |
+        Get-ChildItem -Path . -Include 'obj','bin' -Recurse -Directory | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+
     - name: Cache PowerShell modules
       id: psmodule-cache
       uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306  # https://github.com/actions/cache/releases/tag/v5.0.3
