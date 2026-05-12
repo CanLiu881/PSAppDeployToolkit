@@ -78,6 +78,20 @@ jobs:
       shell: cmd
       run: powershell.exe -ExecutionPolicy Bypass -File build.ps1
 
+    - name: Install 7-Zip if not present
+      shell: powershell
+      run: |
+        # windows-latest runners have 7-Zip pre-installed; self-hosted runners may not.
+        if (!(Test-Path 'C:\Program Files\7-Zip\7z.exe') -and !(Test-Path 'C:\Program Files (x86)\7-Zip\7z.exe'))
+        {
+            Write-Host '7-Zip not found, installing via winget...'
+            winget install --id 7zip.7zip --exact --silent --accept-package-agreements --accept-source-agreements
+        }
+        else
+        {
+            Write-Host '7-Zip already installed, skipping.'
+        }
+
     - name: Install AzureSignTool
       if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/4.0.x' || github.ref == 'refs/heads/4.1.x'
       run: dotnet tool install --global azuresigntool
