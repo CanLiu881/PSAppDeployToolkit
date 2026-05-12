@@ -104,10 +104,14 @@ jobs:
             }
             else
             {
-                # Fall back to direct MSI download from 7-zip.org
+                # Fall back to direct MSI download from 7-zip.org.
+                # Use regex on raw HTML because -UseBasicParsing does not reliably populate Links.href.
                 $msi = "$env:TEMP\7z-x64.msi"
-                $page = Invoke-WebRequest -Uri 'https://www.7-zip.org/download.html' -UseBasicParsing
-                $url = 'https://www.7-zip.org/' + ($page.Links.href | Where-Object { $_ -match '7z\d+-x64\.msi$' } | Select-Object -First 1)
+                $html = (Invoke-WebRequest -Uri 'https://www.7-zip.org/download.html' -UseBasicParsing).Content
+                $match = [System.Text.RegularExpressions.Regex]::Match($html, 'href="(a/7z\d+-x64\.msi)"')
+                if (!$match.Success) { throw '7-Zip MSI download URL not found on 7-zip.org/download.html.' }
+                $url = 'https://www.7-zip.org/' + $match.Groups[1].Value
+                Write-Host "Downloading $url"
                 Invoke-WebRequest -Uri $url -OutFile $msi -UseBasicParsing
                 Start-Process msiexec.exe -ArgumentList "/i `"$msi`" /quiet /norestart" -Wait
                 Remove-Item $msi -Force
